@@ -1,3 +1,4 @@
 b https://google.com 0
 c https://youtube.com 0
 d https://leetcode.com/ 0
+e google.com 0

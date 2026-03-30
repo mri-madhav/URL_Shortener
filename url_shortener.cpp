@@ -70,24 +70,28 @@ string URLShortener::shorten(string url) {
 
 
 // Redirect short URL
-string URLShortener::redirect(string code) {
+string URLShortener::redirect(string code){
 
-    if(codeToUrl.find(code) != codeToUrl.end()) {
+    auto it = codeToUrl.find(code);
+
+    if(it != codeToUrl.end()){
 
         clicks[code]++;
-        cout << "DEBUG clicks: " << clicks[code] << endl;
 
-        return codeToUrl[code];
+        cout << "DEBUG redirect clicks = " << clicks[code] << endl;
+
+        return it->second;
     }
 
     return "URL not found";
 }
 
-int URLShortener::getClicks(string code) {
+int URLShortener::getClicks(string code){
 
     auto it = clicks.find(code);
 
-    if(it != clicks.end()) {
+    if(it != clicks.end()){
+        cout << "DEBUG getClicks = " << it->second << endl;
         return it->second;
     }
 

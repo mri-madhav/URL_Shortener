@@ -1,70 +1,36 @@
-#include <iostream>
-#include "server.h"
+#include "crow/crow.h"
 #include "url_shortener.h"
 
-using namespace std;
+URLShortener shortener;
 
 void startServer() {
 
-    URLShortener shortener;
+    crow::SimpleApp app;
 
-    while(true) {
+    // shorten URL
+    CROW_ROUTE(app, "/shorten")
+    .methods("POST"_method)
+    ([](const crow::request& req){
 
-        cout << "\n===== URL Shortener =====\n";
-        cout << "1. Shorten URL\n";
-        cout << "2. Open Short URL\n";
-        cout << "3. View Click Analytics\n";
-        cout << "4. Exit\n";
+        auto url = req.body;
 
-        int choice;
-        cin >> choice;
+        std::string code = shortener.shorten(url);
 
-        if(choice == 1) {
+        return "short.ly/" + code;
+    });
 
-            string url;
-            cout << "Enter URL: ";
-            getline(cin >> ws, url);
+    // redirect
+    CROW_ROUTE(app, "/<string>")
+    ([](std::string code){
 
-            string code = shortener.shorten(url);
+        std::string url = shortener.redirect(code);
 
-            cout << "Short URL: short.ly/" << code << endl;
-        }
+        crow::response res;
+        res.code = 302;
+        res.set_header("Location", url);
 
-        else if(choice == 2) {
+        return res;
+    });
 
-            string code;
-            cout << "Enter short code: ";
-            getline(cin >> ws, code);
-
-            string original = shortener.redirect(code);
-
-            cout << "Redirected URL: " << original << endl;
-        }
-
-        else if(choice == 3) {
-
-            string code;
-            cout << "Enter short code: ";
-            getline(cin >> ws, code);
-
-            int count = shortener.getClicks(code);
-
-            if(count == -1) {
-                cout << "Short URL not found\n";
-            }
-            else {
-                cout << "Total clicks for short.ly/" << code << " = " << count << endl;
-            }
-        }
-
-        else if(choice == 4) {
-
-            cout << "Exiting server...\n";
-            break;
-        }
-
-        else {
-            cout << "Invalid choice\n";
-        }
-    }
+    app.port(18080).multithreaded().run();
 }
